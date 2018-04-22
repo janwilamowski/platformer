@@ -83,10 +83,8 @@ class Ninja(pygame.sprite.Sprite):
     def fall(self, level):
         if self.state == 'Climb': return
 
-        if any(block.collidepoint(self.rect.bottomright) or
-                    block.collidepoint(self.rect.bottomleft)
-                    for block in level):
-            self.velocity.y = 0 # TODO: overshoots boundary
+        if self.rect.collidelistall(level):
+            self.velocity.y = 0
         else:
             self.velocity.y = 8
 
@@ -137,7 +135,7 @@ class Ninja(pygame.sprite.Sprite):
         self.state = 'Attack'
 
 
-    def update(self, dt):
+    def update(self, level):
         """
         Updates the image of Sprite every 6 frame (approximately every 0.1 second if frame rate is 60).
         """
@@ -163,10 +161,26 @@ class Ninja(pygame.sprite.Sprite):
                     self.current_animation = None
                     self.state = 'Idle' # TODO: reset to previous?
 
-        self.rect.move_ip(self.velocity.x, self.velocity.y)
+        # collision detection
+        self.rect.move_ip(self.velocity.x, 0)
+        for block in level:
+            if block.colliderect(self.rect):
+                if self.velocity.x > 0: # moving right
+                    self.rect.right = block.left
+                else: # moving left
+                    self.rect.left = block.right
+        self.rect.move_ip(0, self.velocity.y)
+        for block in level:
+            if block.colliderect(self.rect):
+                if self.velocity.y > 0: # moving down
+                    self.rect.bottom = block.top
+                else: # moving up
+                    self.rect.top = block.bottom
+
         # correct if off screen
         if self.rect.x < 0:
             self.rect.x = 0
         elif self.rect.x > self.screen.w - self.rect.w:
             self.rect.x = self.screen.w - self.rect.w
-        # TODO: check collisions with level
+        if self.rect.y < 0:
+            self.rect.y = 0

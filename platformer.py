@@ -60,7 +60,7 @@ def main():
 
         player.fall(blocks)
 
-        moving_sprites.update(dt)  # Calls the 'update' method on all sprites in the list
+        moving_sprites.update(blocks)  # Calls the 'update' method on all sprites in the list
 
         # screen.fill(BACKGROUND_COLOR)
         screen.blit(bg.image, bg.rect)
