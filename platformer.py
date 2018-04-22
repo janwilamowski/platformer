@@ -20,10 +20,11 @@ clock = pygame.time.Clock()
 
 def main():
     bg = Background(SIZE)
-    player = Ninja(position=(100, 100), screen=bg.rect)
+    player = Ninja(position=(200, 100), screen=bg.rect)
     moving_sprites = pygame.sprite.Group(player)
-    level = load_level()
+    level, objects = load_level()
     fixed_sprites = pygame.sprite.Group(*level)
+    fixed_sprites.add(*objects)
     blocks = [block.rect for block in level]
 
     debug = False
