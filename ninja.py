@@ -50,6 +50,7 @@ class Ninja(pygame.sprite.Sprite):
 
         self.animation_frames = 4 # video frames per animation frame
         self.current_frame = 0
+        self.previous_state = 'Idle'
 
         self.facing_right = True
         self.current_animation = None
@@ -93,6 +94,7 @@ class Ninja(pygame.sprite.Sprite):
         self.facing_right = True
         self.frozen = False
         self.velocity.x = 4
+        self.previous_state = 'Run'
 
 
     def move_left(self):
@@ -100,6 +102,7 @@ class Ninja(pygame.sprite.Sprite):
         self.facing_right = False
         self.frozen = False
         self.velocity.x = -4
+        self.previous_state = 'Run'
 
 
     def move_down(self):
@@ -122,10 +125,16 @@ class Ninja(pygame.sprite.Sprite):
             # self.frozen = False
         self.velocity.x = 0
         self.velocity.y = 0
+        self.previous_state = 'Idle'
 
 
     def jump(self):
-        self.state = 'Jump' # TODO: perform animation (capture x-speed, inc&dec y speed)
+        if self.current_animation: return
+
+        self.current_animation = 'Jump'
+        self.index = -1
+        self.current_frame = 0 # make sure each jump frame is the same length
+        self.state = 'Jump'
 
 
     def attack(self):
@@ -165,8 +174,11 @@ class Ninja(pygame.sprite.Sprite):
         if not self.facing_right:
             self.images = [pygame.transform.flip(image, True, False) for image in self.images]
 
+        jump_y = [-10.0, -9.511, -8.09, -5.878, -3.09, -0.0, 3.09, 5.878, 8.09, 9.511]
         if not self.frozen:
             self.current_frame += 1
+            if self.current_animation == 'Jump':
+                self.velocity.y = jump_y[self.index+1]
             if self.current_frame >= self.animation_frames:
                 self.current_frame = 0
                 self.index = (self.index + 1) % len(self.images)
@@ -174,7 +186,7 @@ class Ninja(pygame.sprite.Sprite):
                 if self.current_animation:
                     if self.index == len(self.images) - 1:
                         self.current_animation = None
-                        self.state = 'Idle' # TODO: reset to previous?
+                        self.state = self.previous_state
 
         # collision detection
         self.rect.move_ip(self.velocity.x, 0)
