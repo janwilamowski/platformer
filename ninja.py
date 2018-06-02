@@ -131,18 +131,21 @@ class Ninja(pygame.sprite.Sprite):
     def jump(self):
         if self.current_animation: return
 
-        self.current_animation = 'Jump'
+        self.current_animation = self.state = 'Jump'
         self.index = -1
         self.current_frame = 0 # make sure each jump frame is the same length
-        self.state = 'Jump'
 
 
     def attack(self):
         if self.current_animation: return
 
-        self.current_animation = 'Attack'
+        self.current_animation = self.state = 'Attack'
         self.index = -1
-        self.state = 'Attack'
+
+
+    def die(self):
+        self.current_animation = self.state = 'Dead'
+        self.index = -1
 
 
     def draw(self, surface, debug=False):
@@ -185,8 +188,11 @@ class Ninja(pygame.sprite.Sprite):
                 self.image = self.images[self.index]
                 if self.current_animation:
                     if self.index == len(self.images) - 1:
-                        self.current_animation = None
-                        self.state = self.previous_state
+                        if self.state == 'Dead':
+                            self.frozen = True
+                        else:
+                            self.current_animation = None
+                            self.state = self.previous_state
 
         # collision detection
         self.rect.move_ip(self.velocity.x, 0)

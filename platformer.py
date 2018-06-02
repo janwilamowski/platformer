@@ -7,7 +7,7 @@ from __future__ import print_function, division
 import sys, os
 from collections import namedtuple
 import pygame
-from pygame import K_RIGHT, K_LEFT, K_DOWN, K_UP, K_SPACE, K_ESCAPE, K_F1, K_LCTRL
+from pygame import K_RIGHT, K_LEFT, K_DOWN, K_UP, K_SPACE, K_ESCAPE, K_F1, K_LCTRL, K_x
 from sprites import Background, load_level
 from ninja import Ninja
 
@@ -56,6 +56,8 @@ def main():
                     player.jump()
                 elif event.key == K_LCTRL:
                     player.attack()
+                elif event.key == K_x:
+                    player.die()
             elif event.type == pygame.KEYUP:
                 if event.key in (K_RIGHT, K_LEFT, K_UP, K_DOWN):
                     player.stop()
