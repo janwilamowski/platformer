@@ -48,12 +48,10 @@ class Ninja(pygame.sprite.Sprite):
 
         self.velocity = Vector2(0, 0)
 
-        self.animation_frames = 6
+        self.animation_frames = 4 # video frames per animation frame
         self.current_frame = 0
 
         self.current_animation = None
-        self.animation_start = None
-
         self.frozen = False
 
 
@@ -72,7 +70,7 @@ class Ninja(pygame.sprite.Sprite):
             pattern = '{}_?.png'.format(state)
             images[state] = []
             files = glob.glob(os.path.join(path, pattern)) if pattern else os.listdir(path)
-            for file_name in files:
+            for file_name in sorted(files):
                 image = pygame.image.load(file_name).convert_alpha()
                 h, l = image.get_rect()[-2:]
                 image = pygame.transform.scale(image, (h/4, l/4))
@@ -131,8 +129,15 @@ class Ninja(pygame.sprite.Sprite):
         if self.current_animation: return
 
         self.current_animation = 'Attack'
-        self.animation_start = self.index = 0
+        self.index = -1
         self.state = 'Attack'
+
+
+    def get_anim(self):
+        if self.current_animation:
+            return self.images, self.index
+        else:
+            return [], None
 
 
     def update(self, level):
@@ -140,12 +145,8 @@ class Ninja(pygame.sprite.Sprite):
         Updates the image of Sprite every 6 frame (approximately every 0.1 second if frame rate is 60).
         """
         self.images = self.all_images[self.state]
-        self.images_right = self.images
-        self.images_left = [pygame.transform.flip(image, True, False) for image in self.images]  # Flipping every image.
-        if self.velocity.x > 0:  # Use the right images if sprite is moving right.
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
+        if self.velocity.x < 0:
+            self.images = [pygame.transform.flip(image, True, False) for image in self.images]
 
         if not self.frozen:
             self.current_frame += 1
@@ -154,12 +155,9 @@ class Ninja(pygame.sprite.Sprite):
                 self.index = (self.index + 1) % len(self.images)
                 self.image = self.images[self.index]
                 if self.current_animation:
-                    print(self.index) # TODO: animation incomplete and choppy
-                if self.index == self.animation_start:
-                    print('animation over')
-                    self.animation_start = None
-                    self.current_animation = None
-                    self.state = 'Idle' # TODO: reset to previous?
+                    if self.index == len(self.images) - 1:
+                        self.current_animation = None
+                        self.state = 'Idle' # TODO: reset to previous?
 
         # collision detection
         self.rect.move_ip(self.velocity.x, 0)

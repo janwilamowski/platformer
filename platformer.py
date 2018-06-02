@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 
-import sys
+""" TODO:
+- stop walking left, keep left idle
+"""
+
+from __future__ import print_function, division
+import sys, os
 from collections import namedtuple
 import pygame
 from pygame import K_RIGHT, K_LEFT, K_DOWN, K_UP, K_SPACE, K_ESCAPE, K_F1, K_LCTRL
 from sprites import Background, load_level
 from ninja import Ninja
 
-
+os.environ['SDL_VIDEO_WINDOW_POS'] = "366,0"
 pygame.init()
 
 SIZE = WIDTH, HEIGHT = 1000, 740
@@ -63,12 +68,27 @@ def main():
 
         moving_sprites.update(blocks)  # Calls the 'update' method on all sprites in the list
 
+
         # screen.fill(BACKGROUND_COLOR)
         screen.blit(bg.image, bg.rect)
         fixed_sprites.draw(screen)
         moving_sprites.draw(screen)
 
         if debug:
+            # show animation progression
+            anim, idx = player.get_anim()
+            x = y = 20
+            scale_factor = -0.5
+            for i, a in enumerate(anim):
+                rect = a.get_rect()
+                rect.inflate_ip(rect.w * scale_factor, rect.h * scale_factor)
+                image = pygame.transform.scale(a, rect[-2:])
+                rect.move_ip(x, y)
+                x += rect.width
+                screen.blit(image, rect)
+                if i == idx:
+                    pygame.draw.rect(screen, pygame.Color('red'), rect, 1)
+
             for s in moving_sprites:
                 pygame.draw.rect(screen, pygame.Color('red'), s.rect, 1)
             for s in fixed_sprites:
