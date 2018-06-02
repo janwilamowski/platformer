@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 """ TODO:
-- stop walking left, keep left idle
 """
 
 from __future__ import print_function, division
@@ -26,7 +25,6 @@ clock = pygame.time.Clock()
 def main():
     bg = Background(SIZE)
     player = Ninja(position=(200, 100), screen=bg.rect)
-    moving_sprites = pygame.sprite.Group(player)
     level, objects = load_level()
     fixed_sprites = pygame.sprite.Group(*level)
     fixed_sprites.add(*objects)
@@ -65,14 +63,12 @@ def main():
                 #     player.velocity.y = 0
 
         player.fall(blocks)
-
-        moving_sprites.update(blocks)  # Calls the 'update' method on all sprites in the list
-
+        player.update(blocks)
 
         # screen.fill(BACKGROUND_COLOR)
         screen.blit(bg.image, bg.rect)
         fixed_sprites.draw(screen)
-        moving_sprites.draw(screen)
+        player.draw(screen, debug)
 
         if debug:
             # show animation progression
@@ -89,8 +85,7 @@ def main():
                 if i == idx:
                     pygame.draw.rect(screen, pygame.Color('red'), rect, 1)
 
-            for s in moving_sprites:
-                pygame.draw.rect(screen, pygame.Color('red'), s.rect, 1)
+            pygame.draw.rect(screen, pygame.Color('red'), player.rect, 1)
             for s in fixed_sprites:
                 pygame.draw.rect(screen, pygame.Color('red'), s.rect, 1)
 

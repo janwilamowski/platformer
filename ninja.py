@@ -51,6 +51,7 @@ class Ninja(pygame.sprite.Sprite):
         self.animation_frames = 4 # video frames per animation frame
         self.current_frame = 0
 
+        self.facing_right = True
         self.current_animation = None
         self.frozen = False
 
@@ -89,12 +90,14 @@ class Ninja(pygame.sprite.Sprite):
 
     def move_right(self):
         self.state = 'Run'
+        self.facing_right = True
         self.frozen = False
         self.velocity.x = 4
 
 
     def move_left(self):
         self.state = 'Run'
+        self.facing_right = False
         self.frozen = False
         self.velocity.x = -4
 
@@ -133,6 +136,20 @@ class Ninja(pygame.sprite.Sprite):
         self.state = 'Attack'
 
 
+    def draw(self, surface, debug=False):
+        pos = self.rect
+        img_width = self.image.get_rect().width
+        # TODO: some of the sprites have a margin
+        pos.width = img_width
+        if not self.facing_right:
+            idle_width = 58
+            dx = idle_width - img_width
+            pos = self.rect.move(dx, 0)
+        surface.blit(self.image, pos)
+        if debug:
+            pygame.draw.rect(surface, pygame.Color('red'), pos, 1)
+
+
     def get_anim(self):
         if self.current_animation:
             return self.images, self.index
@@ -145,7 +162,7 @@ class Ninja(pygame.sprite.Sprite):
         Updates the image of Sprite every 6 frame (approximately every 0.1 second if frame rate is 60).
         """
         self.images = self.all_images[self.state]
-        if self.velocity.x < 0:
+        if not self.facing_right:
             self.images = [pygame.transform.flip(image, True, False) for image in self.images]
 
         if not self.frozen:
