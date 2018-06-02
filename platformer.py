@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 
 """ TODO:
+- continuous animations while key is pressed?
+- throwing attack
+- fix double jump
+- level bigger than screen & scrolling
 """
 
 from __future__ import print_function, division
 import sys, os
 from collections import namedtuple
 import pygame
-from pygame import K_RIGHT, K_LEFT, K_DOWN, K_UP, K_SPACE, K_ESCAPE, K_F1, K_LCTRL, K_x
+from pygame import K_RIGHT, K_LEFT, K_DOWN, K_UP, K_SPACE, K_ESCAPE, K_F1, K_LCTRL, K_x, K_c
 from sprites import Background, load_level
 from ninja import Ninja
 
@@ -58,6 +62,8 @@ def main():
                     player.attack()
                 elif event.key == K_x:
                     player.die()
+                elif event.key == K_c:
+                    player.glide(blocks)
             elif event.type == pygame.KEYUP:
                 if event.key in (K_RIGHT, K_LEFT, K_UP, K_DOWN):
                     player.stop()

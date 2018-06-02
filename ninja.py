@@ -22,6 +22,8 @@ player_states = {
     'Jump_Throw',
 }
 
+FALL_SPEED = 8
+
 
 class Ninja(pygame.sprite.Sprite):
 
@@ -86,7 +88,7 @@ class Ninja(pygame.sprite.Sprite):
         if self.rect.collidelistall(level):
             self.velocity.y = 0
         else:
-            self.velocity.y = 8
+            self.velocity.y = FALL_SPEED / 4 if self.state == 'Glide' else FALL_SPEED
 
 
     def move_right(self):
@@ -145,6 +147,13 @@ class Ninja(pygame.sprite.Sprite):
 
     def die(self):
         self.current_animation = self.state = 'Dead'
+        self.index = -1
+
+
+    def glide(self, level):
+        if self.rect.collidelistall(level): return
+
+        self.current_animation = self.state = 'Glide'
         self.index = -1
 
 
