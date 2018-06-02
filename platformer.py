@@ -18,6 +18,9 @@ from ninja import Ninja
 os.environ['SDL_VIDEO_WINDOW_POS'] = "366,0"
 pygame.init()
 
+logo = pygame.image.load('./gfx/logo.png')
+pygame.display.set_icon(logo)
+
 SIZE = WIDTH, HEIGHT = 1000, 740
 BACKGROUND_COLOR = pygame.Color('black')
 FPS = 60
