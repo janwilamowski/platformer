@@ -1,5 +1,6 @@
 import os, glob
 import pygame
+from sprites import Kunai
 
 
 class Vector2():
@@ -143,6 +144,19 @@ class Ninja(pygame.sprite.Sprite):
 
         self.current_animation = self.state = 'Attack'
         self.index = -1
+
+
+    def throw(self):
+        if self.current_animation: return
+
+        self.current_animation = self.state = 'Throw'
+        self.index = -1
+        if self.facing_right:
+            pos = self.rect.move(self.rect.width, self.rect.height / 2)
+        else:
+            pos = self.rect.move(-10, self.rect.height / 2)
+
+        return Kunai(pos[:2], self.facing_right, self.screen)
 
 
     def die(self):
