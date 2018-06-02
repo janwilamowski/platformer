@@ -140,11 +140,11 @@ class Ninja(pygame.sprite.Sprite):
         pos = self.rect
         img_width = self.image.get_rect().width
         # TODO: some of the sprites have a margin
-        pos.width = img_width
         if not self.facing_right:
             idle_width = 58
             dx = idle_width - img_width
             pos = self.rect.move(dx, 0)
+            pos.width = img_width
         surface.blit(self.image, pos)
         if debug:
             pygame.draw.rect(surface, pygame.Color('red'), pos, 1)
@@ -180,9 +180,9 @@ class Ninja(pygame.sprite.Sprite):
         self.rect.move_ip(self.velocity.x, 0)
         for block in level:
             if block.colliderect(self.rect):
-                if self.velocity.x > 0: # moving right
+                if self.facing_right:
                     self.rect.right = block.left
-                else: # moving left
+                else:
                     self.rect.left = block.right
         self.rect.move_ip(0, self.velocity.y)
         for block in level:
