@@ -114,13 +114,17 @@ class Kunai(pygame.sprite.Sprite):
             self.rect.x, self.rect.y = pos
         else:
             self.rect.right, self.rect.y = pos
+        self.rect.x -= 1000 # hide until active
         self.moving_right = moving_right
         self.screen = screen
         self.counter = 0
+        self.frozen = True
 
 
     def update(self, level):
         """ Returns True if we're off screen and False otherwise """
+        if self.frozen: return
+
         dx = 8 if self.moving_right else -8
         self.rect.move_ip(dx, 0)
         center = self.rect.center

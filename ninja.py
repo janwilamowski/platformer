@@ -59,6 +59,8 @@ class Ninja(pygame.sprite.Sprite):
         self.current_animation = None
         self.frozen = False
 
+        self.callbacks = []
+
 
     def load_images(self, path, pattern=None):
         """
@@ -93,14 +95,21 @@ class Ninja(pygame.sprite.Sprite):
 
 
     def move_right(self):
+        if self.state != 'Run':
+            self.current_frame = self.animation_frames
+
         self.state = 'Run'
         self.facing_right = True
         self.frozen = False
         self.velocity.x = 4
         self.previous_state = 'Run'
+#        self.current_frame = self.animation_frames
 
 
     def move_left(self):
+        if self.state != 'Run':
+            self.current_frame = self.animation_frames
+
         self.state = 'Run'
         self.facing_right = False
         self.frozen = False
@@ -134,41 +143,42 @@ class Ninja(pygame.sprite.Sprite):
     def jump(self):
         if self.current_animation: return
 
-        self.current_animation = self.state = 'Jump'
-        self.index = -1
+        self.set_anim('Jump')
+        # TODO: delays animation
         self.current_frame = 0 # make sure each jump frame is the same length
 
 
     def attack(self):
         if self.current_animation: return
 
-        self.current_animation = self.state = 'Attack'
-        self.index = -1
+        self.set_anim('Attack')
 
 
     def throw(self):
         if self.current_animation: return
 
-        self.current_animation = self.state = 'Throw'
-        self.index = -1
+        self.set_anim('Throw')
         if self.facing_right:
             pos = self.rect.move(self.rect.width, 40)
         else:
             pos = self.rect.move(-10, 40)
 
-        return Kunai(pos[:2], self.facing_right, self.screen)
+        kunai = Kunai(pos[:2], self.facing_right, self.screen)
+        def activate():
+            kunai.rect.x += 1000
+            kunai.frozen = False
+        self.callbacks.append( (3, activate) )
+        return kunai
 
 
     def die(self):
-        self.current_animation = self.state = 'Dead'
-        self.index = -1
+        self.set_anim('Dead')
 
 
     def glide(self, level):
         if self.rect.collidelistall(level): return
 
-        self.current_animation = self.state = 'Glide'
-        self.index = -1
+        self.set_anim('Glide')
 
 
     def draw(self, surface, debug=False):
@@ -183,6 +193,11 @@ class Ninja(pygame.sprite.Sprite):
         surface.blit(self.image, pos)
         if debug:
             pygame.draw.rect(surface, pygame.Color('red'), pos, 1)
+
+
+    def set_anim(self, animation):
+        self.current_animation = self.state = animation
+        self.index = 0
 
 
     def get_anim(self):
@@ -204,10 +219,13 @@ class Ninja(pygame.sprite.Sprite):
         if not self.frozen:
             self.current_frame += 1
             if self.current_animation == 'Jump':
-                self.velocity.y = jump_y[self.index+1]
+                self.velocity.y = jump_y[self.index]
             if self.current_frame >= self.animation_frames:
                 self.current_frame = 0
                 self.index = (self.index + 1) % len(self.images)
+                if self.callbacks and self.callbacks[0][0] == self.index:
+                    cb = self.callbacks.pop(0)[1]
+                    cb()
                 self.image = self.images[self.index]
                 if self.current_animation:
                     if self.index == len(self.images) - 1:
