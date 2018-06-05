@@ -152,9 +152,9 @@ class Ninja(pygame.sprite.Sprite):
         self.current_animation = self.state = 'Throw'
         self.index = -1
         if self.facing_right:
-            pos = self.rect.move(self.rect.width, self.rect.height / 2)
+            pos = self.rect.move(self.rect.width, 40)
         else:
-            pos = self.rect.move(-10, self.rect.height / 2)
+            pos = self.rect.move(-10, 40)
 
         return Kunai(pos[:2], self.facing_right, self.screen)
 

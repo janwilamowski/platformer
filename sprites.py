@@ -123,7 +123,11 @@ class Kunai(pygame.sprite.Sprite):
         """ Returns True if we're off screen and False otherwise """
         dx = 8 if self.moving_right else -8
         self.rect.move_ip(dx, 0)
-        self.image = pygame.transform.rotate(self.orig_image, self.counter*10)
+        center = self.rect.center
+        self.image = pygame.transform.rotate(self.orig_image, 180 + self.counter*10)
+        self.rect.w = self.image.get_rect().w
+        self.rect.h = self.image.get_rect().h
+        self.rect.center = center
         self.counter += 1
 
         hit = any(self.rect.colliderect(block) for block in level)

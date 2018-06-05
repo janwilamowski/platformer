@@ -2,7 +2,7 @@
 
 """ TODO:
 - continuous animations while key is pressed?
-- fix kunai wobbling
+- fix ninja box displacement on animation change (attack, throw) -> restore to center?
 - destructible objects
 - fix double jump
 - level bigger than screen & scrolling
@@ -103,7 +103,7 @@ def main():
                 rect.move_ip(x, y)
                 x += rect.width
                 screen.blit(image, rect)
-                if i == idx:
+                if i == idx + 1:
                     pygame.draw.rect(screen, pygame.Color('red'), rect, 1)
 
             pygame.draw.rect(screen, pygame.Color('red'), player.rect, 1)
