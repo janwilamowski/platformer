@@ -2,8 +2,7 @@
 
 """ TODO:
 - continuous animations while key is pressed?
-- fix ninja box displacement on animation change (attack, throw) -> restore to center?
-- destructible objects
+- fix ninja box displacement on animation change (attack, throw) -> restore to center? individual per animation type?
 - fix double jump
 - level bigger than screen & scrolling
 """
@@ -33,10 +32,11 @@ clock = pygame.time.Clock()
 def main():
     bg = Background(SIZE)
     player = Ninja(position=(200, 100), screen=bg.rect)
-    level, objects = load_level()
+    level, deco, objects = load_level()
     fixed_sprites = pygame.sprite.Group(*level)
+    fixed_sprites.add(*deco)
     fixed_sprites.add(*objects)
-    moving_sprites = pygame.sprite.Group()
+    destroyers = pygame.sprite.Group()
     blocks = [block.rect for block in level]
 
     debug = False
@@ -73,7 +73,7 @@ def main():
                 elif event.key == K_v and not paused:
                     kunai = player.throw()
                     if kunai:
-                        moving_sprites.add(kunai)
+                        destroyers.add(kunai)
                 elif event.key == K_p:
                     paused = not paused
             elif event.type == pygame.KEYUP and not paused:
@@ -84,15 +84,21 @@ def main():
 
         if not paused:
             player.fall(blocks)
-            player.update(blocks)
-            for s in moving_sprites:
+            player.update(blocks + [o.rect for o in objects])
+            for s in destroyers:
                 if s.update(blocks):
-                    moving_sprites.remove(s)
+                    destroyers.remove(s)
+                idx = s.rect.collidelist(objects)
+                if idx != -1:
+                    destroyers.remove(s)
+                    obj = objects[idx]
+                    objects.remove(obj)
+                    fixed_sprites.remove(obj)
 
         # screen.fill(BACKGROUND_COLOR)
         screen.blit(bg.image, bg.rect)
         fixed_sprites.draw(screen)
-        moving_sprites.draw(screen)
+        destroyers.draw(screen)
         player.draw(screen, debug)
 
         if debug:
@@ -111,7 +117,7 @@ def main():
                     pygame.draw.rect(screen, pygame.Color('red'), rect, 1)
 
             pygame.draw.rect(screen, pygame.Color('red'), player.rect, 1)
-            for s in fixed_sprites.sprites() + moving_sprites.sprites():
+            for s in fixed_sprites.sprites() + destroyers.sprites():
                 pygame.draw.rect(screen, pygame.Color('red'), s.rect, 1)
 
         pygame.display.update()

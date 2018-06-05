@@ -11,6 +11,7 @@ class  Background(pygame.sprite.Sprite):
 
 def load_level():
     images = []
+    deco = []
     objects = []
     # ground level
     x = 0
@@ -37,8 +38,8 @@ def load_level():
         img = LevelBlock(block, (x, y))
         images.append(img)
         x += 64
-    objects.append( Decoration('stone', (120, 588)))
-    objects.append( Decoration('cactus1', (600, 550)))
+    deco.append( Decoration('stone', (120, 588)))
+    deco.append( Decoration('cactus1', (600, 550)))
 
     # hill
     images.append( LevelBlock('4', (768, 596)) )
@@ -63,6 +64,9 @@ def load_level():
     images.append( LevelBlock('5', (x, y)) )
     y += 64
     images.append( LevelBlock('5', (x, y)) )
+    objects.append( Crate( (450, 354) ) )
+    objects.append( Crate( (500, 354) ) )
+    objects.append( Crate( (475, 304) ) )
 
     # second floor
     x = 600
@@ -74,9 +78,9 @@ def load_level():
         images.append(img)
         x += 64
     images.append( LevelBlock('16', (x, y)) )
-    objects.append( Decoration('skeleton', (700, 132)))
+    deco.append( Decoration('skeleton', (700, 132)))
 
-    return images, objects
+    return images, deco, objects
 
 
 class LevelBlock(pygame.sprite.Sprite):
@@ -136,3 +140,15 @@ class Kunai(pygame.sprite.Sprite):
 
         hit = any(self.rect.colliderect(block) for block in level)
         return hit or self.rect.x > self.screen.w or self.rect.right < 0
+
+
+class Crate(pygame.sprite.Sprite):
+
+    def __init__(self, pos):
+        super(Crate, self).__init__()
+        scale_factor = -0.5
+        image = pygame.image.load('./gfx/objects/crate.png').convert_alpha()
+        self.rect = image.get_rect()
+        self.rect.inflate_ip(self.rect.w * scale_factor, self.rect.h * scale_factor)
+        self.image = pygame.transform.scale(image, self.rect[-2:])
+        self.rect.x, self.rect.y = pos
