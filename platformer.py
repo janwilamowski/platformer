@@ -12,7 +12,7 @@ from __future__ import print_function, division
 import sys, os
 from collections import namedtuple
 import pygame
-from pygame import K_RIGHT, K_LEFT, K_DOWN, K_UP, K_SPACE, K_ESCAPE, K_F1, K_LCTRL, K_x, K_c, K_v
+from pygame import K_RIGHT, K_LEFT, K_DOWN, K_UP, K_SPACE, K_ESCAPE, K_F1, K_LCTRL, K_x, K_c, K_v, K_p
 from sprites import Background, load_level
 from ninja import Ninja
 
@@ -41,6 +41,7 @@ def main():
 
     debug = False
     running = True
+    paused = False
     while running:
 
         dt = clock.tick(FPS) / 1000  # Amount of seconds between each loop.
@@ -53,37 +54,40 @@ def main():
                     sys.exit()
                 elif event.key == K_F1:
                     debug = not debug
-                elif event.key == K_RIGHT:
+                elif event.key == K_RIGHT and not paused:
                     player.move_right()
-                elif event.key == K_LEFT:
+                elif event.key == K_LEFT and not paused:
                     player.move_left()
-                elif event.key == K_UP:
+                elif event.key == K_UP and not paused:
                     player.move_up()
-                elif event.key == K_DOWN:
+                elif event.key == K_DOWN and not paused:
                     player.move_down()
-                elif event.key == K_SPACE:
+                elif event.key == K_SPACE and not paused:
                     player.jump()
-                elif event.key == K_LCTRL:
+                elif event.key == K_LCTRL and not paused:
                     player.attack()
-                elif event.key == K_x:
+                elif event.key == K_x and not paused:
                     player.die()
-                elif event.key == K_c:
+                elif event.key == K_c and not paused:
                     player.glide(blocks)
-                elif event.key == K_v:
+                elif event.key == K_v and not paused:
                     kunai = player.throw()
                     if kunai:
                         moving_sprites.add(kunai)
-            elif event.type == pygame.KEYUP:
+                elif event.key == K_p:
+                    paused = not paused
+            elif event.type == pygame.KEYUP and not paused:
                 if event.key in (K_RIGHT, K_LEFT, K_UP, K_DOWN):
                     player.stop()
                 # elif event.key == K_DOWN or event.key == K_UP:
                 #     player.velocity.y = 0
 
-        player.fall(blocks)
-        player.update(blocks)
-        for s in moving_sprites:
-            if s.update(blocks):
-                moving_sprites.remove(s)
+        if not paused:
+            player.fall(blocks)
+            player.update(blocks)
+            for s in moving_sprites:
+                if s.update(blocks):
+                    moving_sprites.remove(s)
 
         # screen.fill(BACKGROUND_COLOR)
         screen.blit(bg.image, bg.rect)
