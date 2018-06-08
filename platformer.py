@@ -83,6 +83,15 @@ def main():
                     paused = not paused
                 elif event.key == pg.K_b:
                     zombie.die()
+                elif event.key == pg.K_r:
+                    player.state = zombie.state = 'Idle'
+                    player.frozen = zombie.frozen = False
+                    player.rect.x, player.rect.y = (200, 100)
+                    zombie.rect.x, zombie.rect.y = (100, 500)
+                    level, deco, objects = load_level()
+                    fixed_sprites = pg.sprite.Group(*level)
+                    fixed_sprites.add(*deco)
+                    fixed_sprites.add(*objects)
             elif event.type == pg.KEYUP and not paused:
                 if event.key in (pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN):
                     player.stop()
