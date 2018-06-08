@@ -23,6 +23,7 @@ pygame.display.set_icon(logo)
 
 SIZE = WIDTH, HEIGHT = 1000, 740
 BACKGROUND_COLOR = pygame.Color('black')
+RED = pygame.Color('red')
 FPS = 60
 
 screen = pygame.display.set_mode(SIZE)
@@ -38,6 +39,7 @@ def main():
     fixed_sprites.add(*objects)
     destroyers = pygame.sprite.Group()
     blocks = [block.rect for block in level]
+    fading = pygame.sprite.Group()
 
     debug = False
     running = True
@@ -92,13 +94,27 @@ def main():
                 if idx != -1:
                     destroyers.remove(s)
                     obj = objects[idx]
+                    fading.add(obj)
                     objects.remove(obj)
                     fixed_sprites.remove(obj)
+            death_box = player.get_attack_box()
+            if death_box:
+                idx = death_box.collidelist(objects)
+                if idx != -1:
+                    obj = objects[idx]
+                    fading.add(obj)
+                    objects.remove(obj)
+                    fixed_sprites.remove(obj)
+
+        for obj in fading:
+            if obj.fade():
+                fading.remove(obj)
 
         # screen.fill(BACKGROUND_COLOR)
         screen.blit(bg.image, bg.rect)
         fixed_sprites.draw(screen)
         destroyers.draw(screen)
+        fading.draw(screen)
         player.draw(screen, debug)
 
         if debug:
@@ -114,11 +130,21 @@ def main():
                 x += rect.width
                 screen.blit(image, rect)
                 if i == idx + 1:
-                    pygame.draw.rect(screen, pygame.Color('red'), rect, 1)
+                    pygame.draw.rect(screen, RED, rect, 1)
 
-            pygame.draw.rect(screen, pygame.Color('red'), player.rect, 1)
+            pygame.draw.rect(screen, RED, player.rect, 1)
             for s in fixed_sprites.sprites() + destroyers.sprites():
-                pygame.draw.rect(screen, pygame.Color('red'), s.rect, 1)
+                pygame.draw.rect(screen, RED, s.rect, 1)
+
+            if player.current_animation == 'Attack':
+                r = player.rect.h // 2
+                top = player.rect.top
+                x = player.rect.right if player.facing_right else player.rect.left
+                y = top + r
+                pygame.draw.circle(screen, RED, (x, y), r, 1)
+                death_box = player.get_attack_box()
+                if death_box:
+                    pygame.draw.rect(screen, RED, death_box, 1)
 
         pygame.display.update()
 

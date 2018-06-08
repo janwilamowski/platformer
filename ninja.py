@@ -207,6 +207,15 @@ class Ninja(pygame.sprite.Sprite):
             return [], None
 
 
+    def get_attack_box(self):
+        if self.state != 'Attack': return None
+
+        width = self.rect.h // 2
+        left = self.rect.right if self.facing_right else self.rect.left - width
+        rect = pygame.Rect(left, self.rect.top, width, self.rect.h)
+        return rect
+
+
     def update(self, level):
         """
         Updates the image of Sprite every 6 frame (approximately every 0.1 second if frame rate is 60).

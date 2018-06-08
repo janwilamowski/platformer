@@ -132,7 +132,8 @@ class Kunai(pygame.sprite.Sprite):
         dx = 8 if self.moving_right else -8
         self.rect.move_ip(dx, 0)
         center = self.rect.center
-        self.image = pygame.transform.rotate(self.orig_image, 180 + self.counter*10)
+        angle = 180 + self.counter*10 if self.moving_right else 180 - self.counter*10
+        self.image = pygame.transform.rotate(self.orig_image, angle)
         self.rect.w = self.image.get_rect().w
         self.rect.h = self.image.get_rect().h
         self.rect.center = center
@@ -147,8 +148,14 @@ class Crate(pygame.sprite.Sprite):
     def __init__(self, pos):
         super(Crate, self).__init__()
         scale_factor = -0.5
-        image = pygame.image.load('./gfx/objects/crate.png').convert_alpha()
+        image = pygame.image.load('./gfx/objects/crate.png').convert()
         self.rect = image.get_rect()
         self.rect.inflate_ip(self.rect.w * scale_factor, self.rect.h * scale_factor)
         self.image = pygame.transform.scale(image, self.rect[-2:])
         self.rect.x, self.rect.y = pos
+        self.alpha = 255
+
+    def fade(self):
+        self.alpha -= 10
+        self.image.set_alpha(self.alpha)
+        return self.alpha <= 0
