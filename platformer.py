@@ -10,36 +10,35 @@
 from __future__ import print_function, division
 import sys, os
 from collections import namedtuple
-import pygame
-from pygame import K_RIGHT, K_LEFT, K_DOWN, K_UP, K_SPACE, K_ESCAPE, K_F1, K_LCTRL, K_x, K_c, K_v, K_p
+import pygame as pg
 from sprites import Background, load_level
 from ninja import Ninja
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "366,0"
-pygame.init()
+pg.init()
 
-logo = pygame.image.load('./gfx/logo.png')
-pygame.display.set_icon(logo)
+logo = pg.image.load('./gfx/logo.png')
+pg.display.set_icon(logo)
 
 SIZE = WIDTH, HEIGHT = 1000, 740
-BACKGROUND_COLOR = pygame.Color('black')
-RED = pygame.Color('red')
+BACKGROUND_COLOR = pg.Color('black')
+RED = pg.Color('red')
 FPS = 60
 
-screen = pygame.display.set_mode(SIZE)
-clock = pygame.time.Clock()
+screen = pg.display.set_mode(SIZE)
+clock = pg.time.Clock()
 
 
 def main():
     bg = Background(SIZE)
     player = Ninja(position=(200, 100), screen=bg.rect)
     level, deco, objects = load_level()
-    fixed_sprites = pygame.sprite.Group(*level)
+    fixed_sprites = pg.sprite.Group(*level)
     fixed_sprites.add(*deco)
     fixed_sprites.add(*objects)
-    destroyers = pygame.sprite.Group()
+    destroyers = pg.sprite.Group()
     blocks = [block.rect for block in level]
-    fading = pygame.sprite.Group()
+    fading = pg.sprite.Group()
 
     debug = False
     running = True
@@ -48,40 +47,40 @@ def main():
 
         dt = clock.tick(FPS) / 1000  # Amount of seconds between each loop.
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == K_ESCAPE:
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
                     sys.exit()
-                elif event.key == K_F1:
+                elif event.key == pg.K_F1:
                     debug = not debug
-                elif event.key == K_RIGHT and not paused:
+                elif event.key == pg.K_RIGHT and not paused:
                     player.move_right()
-                elif event.key == K_LEFT and not paused:
+                elif event.key == pg.K_LEFT and not paused:
                     player.move_left()
-                elif event.key == K_UP and not paused:
+                elif event.key == pg.K_UP and not paused:
                     player.move_up()
-                elif event.key == K_DOWN and not paused:
+                elif event.key == pg.K_DOWN and not paused:
                     player.move_down()
-                elif event.key == K_SPACE and not paused:
+                elif event.key == pg.K_SPACE and not paused:
                     player.jump()
-                elif event.key == K_LCTRL and not paused:
+                elif event.key == pg.K_LCTRL and not paused:
                     player.attack()
-                elif event.key == K_x and not paused:
+                elif event.key == pg.K_x and not paused:
                     player.die()
-                elif event.key == K_c and not paused:
+                elif event.key == pg.K_c and not paused:
                     player.glide(blocks)
-                elif event.key == K_v and not paused:
+                elif event.key == pg.K_v and not paused:
                     kunai = player.throw()
                     if kunai:
                         destroyers.add(kunai)
-                elif event.key == K_p:
+                elif event.key == pg.K_p:
                     paused = not paused
-            elif event.type == pygame.KEYUP and not paused:
-                if event.key in (K_RIGHT, K_LEFT, K_UP, K_DOWN):
+            elif event.type == pg.KEYUP and not paused:
+                if event.key in (pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN):
                     player.stop()
-                # elif event.key == K_DOWN or event.key == K_UP:
+                # elif event.key == pg.K_DOWN or event.key == pg.K_UP:
                 #     player.velocity.y = 0
 
         if not paused:
@@ -125,28 +124,28 @@ def main():
             for i, a in enumerate(anim):
                 rect = a.get_rect()
                 rect.inflate_ip(rect.w * scale_factor, rect.h * scale_factor)
-                image = pygame.transform.scale(a, rect[-2:])
+                image = pg.transform.scale(a, rect[-2:])
                 rect.move_ip(x, y)
                 x += rect.width
                 screen.blit(image, rect)
                 if i == idx + 1:
-                    pygame.draw.rect(screen, RED, rect, 1)
+                    pg.draw.rect(screen, RED, rect, 1)
 
-            pygame.draw.rect(screen, RED, player.rect, 1)
+            pg.draw.rect(screen, RED, player.rect, 1)
             for s in fixed_sprites.sprites() + destroyers.sprites():
-                pygame.draw.rect(screen, RED, s.rect, 1)
+                pg.draw.rect(screen, RED, s.rect, 1)
 
             if player.current_animation == 'Attack':
                 r = player.rect.h // 2
                 top = player.rect.top
                 x = player.rect.right if player.facing_right else player.rect.left
                 y = top + r
-                pygame.draw.circle(screen, RED, (x, y), r, 1)
+                pg.draw.circle(screen, RED, (x, y), r, 1)
                 death_box = player.get_attack_box()
                 if death_box:
-                    pygame.draw.rect(screen, RED, death_box, 1)
+                    pg.draw.rect(screen, RED, death_box, 1)
 
-        pygame.display.update()
+        pg.display.update()
 
 
 if __name__ == '__main__':
