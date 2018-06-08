@@ -4,6 +4,8 @@
 - continuous animations while key is pressed?
 - fix ninja box displacement on animation change (attack, throw) -> restore to center? individual per animation type?
 - fix double jump
+- have objects fall
+- walking interferes with animations
 - level bigger than screen & scrolling
 """
 
@@ -13,6 +15,7 @@ from collections import namedtuple
 import pygame as pg
 from sprites import Background, load_level
 from ninja import Ninja
+from zombie import Zombie
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "366,0"
 pg.init()
@@ -32,6 +35,7 @@ clock = pg.time.Clock()
 def main():
     bg = Background(SIZE)
     player = Ninja(position=(200, 100), screen=bg.rect)
+    zombie = Zombie((100, 500), bg.rect, False)
     level, deco, objects = load_level()
     fixed_sprites = pg.sprite.Group(*level)
     fixed_sprites.add(*deco)
@@ -77,6 +81,8 @@ def main():
                         destroyers.add(kunai)
                 elif event.key == pg.K_p:
                     paused = not paused
+                elif event.key == pg.K_b:
+                    zombie.die()
             elif event.type == pg.KEYUP and not paused:
                 if event.key in (pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN):
                     player.stop()
@@ -85,7 +91,9 @@ def main():
 
         if not paused:
             player.fall(blocks)
+            zombie.fall(blocks)
             player.update(blocks + [o.rect for o in objects])
+            zombie.update(blocks + [o.rect for o in objects])
             for s in destroyers:
                 if s.update(blocks):
                     destroyers.remove(s)
@@ -115,6 +123,7 @@ def main():
         destroyers.draw(screen)
         fading.draw(screen)
         player.draw(screen, debug)
+        zombie.draw(screen, debug)
 
         if debug:
             # show animation progression
