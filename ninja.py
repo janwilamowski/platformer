@@ -46,6 +46,7 @@ class Ninja(Character):
         if self.current_animation: return
 
         self.set_anim('Throw')
+        self.hidden = False
         if self.facing_right:
             pos = self.rect.move(self.rect.width, 40)
         else:

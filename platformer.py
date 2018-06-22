@@ -83,7 +83,11 @@ def main():
                     paused = not paused
                 elif event.key == pg.K_b:
                     zombie.die()
+                elif event.key == pg.K_s:
+                    # stealth mode
+                    player.toggle_hide()
                 elif event.key == pg.K_r:
+                    # reset
                     player.state = zombie.state = 'Idle'
                     player.frozen = zombie.frozen = False
                     player.rect.x, player.rect.y = (200, 100)

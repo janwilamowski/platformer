@@ -46,6 +46,7 @@ class Character(pygame.sprite.Sprite):
         self.facing_right = True
         self.current_animation = None
         self.frozen = False
+        self.hidden = False
 
         self.callbacks = []
 
@@ -125,10 +126,15 @@ class Character(pygame.sprite.Sprite):
         if self.current_animation: return
 
         self.set_anim('Attack')
+        self.hidden = False
 
 
     def die(self):
         self.set_anim('Dead')
+
+
+    def toggle_hide(self):
+        self.hidden = not self.hidden
 
 
     def draw(self, surface, debug=False):
@@ -140,7 +146,11 @@ class Character(pygame.sprite.Sprite):
             dx = idle_width - img_width
             pos = self.rect.move(dx, 0)
             pos.width = img_width
-        surface.blit(self.image, pos)
+        image = self.image.copy()
+        if self.hidden:
+            alpha = 128
+            image.fill((255, 255, 255, alpha), None, pygame.BLEND_RGBA_MULT)
+        surface.blit(image, pos)
         if debug:
             pygame.draw.rect(surface, pygame.Color('red'), pos, 1)
 
