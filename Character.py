@@ -47,6 +47,7 @@ class Character(pygame.sprite.Sprite):
         self.current_animation = None
         self.frozen = False
         self.hidden = False
+        self.alpha = 255
 
         self.callbacks = []
 
@@ -82,7 +83,7 @@ class Character(pygame.sprite.Sprite):
     def fall(self, level):
         if self.state == 'Climb': return
 
-        if self.rect.collidelistall(level):
+        if self.rect.collidelist(level) != -1:
             self.velocity.y = 0
         else:
             self.velocity.y = FALL_SPEED / 4 if self.state == 'Glide' else FALL_SPEED
@@ -131,10 +132,16 @@ class Character(pygame.sprite.Sprite):
 
     def die(self):
         self.set_anim('Dead')
+        self.velocity.x = self.velocity.y = 0
 
 
     def toggle_hide(self):
         self.hidden = not self.hidden
+
+
+    def fade(self):
+        self.alpha -= 2
+        return self.alpha <= 0
 
 
     def draw(self, surface, debug=False):
@@ -150,6 +157,8 @@ class Character(pygame.sprite.Sprite):
         if self.hidden:
             alpha = 128
             image.fill((255, 255, 255, alpha), None, pygame.BLEND_RGBA_MULT)
+        elif 0 <= self.alpha < 255:
+            image.fill((255, 255, 255, self.alpha), None, pygame.BLEND_RGBA_MULT)
         surface.blit(image, pos)
         if debug:
             pygame.draw.rect(surface, pygame.Color('red'), pos, 1)

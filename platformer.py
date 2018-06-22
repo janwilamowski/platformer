@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
 """ TODO:
+- zombie rect is too large
+- health points/bar
+- sneak attack
+- zombie states: idle, following, attacking, dead
 - continuous animations while key is pressed?
 - fix ninja box displacement on animation change (attack, throw) -> restore to center? individual per animation type?
 - fix double jump
@@ -36,6 +40,7 @@ def main():
     bg = Background(SIZE)
     player = Ninja(position=(200, 100), screen=bg.rect)
     zombie = Zombie((100, 500), bg.rect, False)
+    zombies = pg.sprite.Group(zombie)
     level, deco, objects = load_level()
     fixed_sprites = pg.sprite.Group(*level)
     fixed_sprites.add(*deco)
@@ -43,6 +48,7 @@ def main():
     destroyers = pg.sprite.Group()
     blocks = [block.rect for block in level]
     fading = pg.sprite.Group()
+    fading_zombies = pg.sprite.Group()
 
     debug = False
     running = True
@@ -83,6 +89,8 @@ def main():
                     paused = not paused
                 elif event.key == pg.K_b:
                     zombie.die()
+                elif event.key == pg.K_a:
+                    zombie.attack()
                 elif event.key == pg.K_s:
                     # stealth mode
                     player.toggle_hide()
@@ -91,7 +99,8 @@ def main():
                     player.state = zombie.state = 'Idle'
                     player.frozen = zombie.frozen = False
                     player.rect.x, player.rect.y = (200, 100)
-                    zombie.rect.x, zombie.rect.y = (100, 500)
+                    zombie = Zombie((100, 500), bg.rect, False)
+                    zombies = pg.sprite.Group(zombie)
                     level, deco, objects = load_level()
                     fixed_sprites = pg.sprite.Group(*level)
                     fixed_sprites.add(*deco)
@@ -103,10 +112,17 @@ def main():
                 #     player.velocity.y = 0
 
         if not paused:
+            # update character geometry
             player.fall(blocks)
-            zombie.fall(blocks)
-            player.update(blocks + [o.rect for o in objects])
-            zombie.update(blocks + [o.rect for o in objects])
+            for zombie in zombies:
+                zombie.fall(blocks)
+            player.update(blocks + [o.rect for o in objects + zombies.sprites()])
+            for zombie in zombies:
+                zombie.update(blocks + [o.rect for o in objects + [player]])
+            for zombie in fading_zombies:
+                zombie.update([])
+
+            # ranged attacks
             for s in destroyers:
                 if s.update(blocks):
                     destroyers.remove(s)
@@ -117,6 +133,14 @@ def main():
                     fading.add(obj)
                     objects.remove(obj)
                     fixed_sprites.remove(obj)
+                for zombie in zombies:
+                    if s.rect.colliderect(zombie.rect):
+                        zombie.die()
+                        zombies.remove(zombie)
+                        fading_zombies.add(zombie)
+                        destroyers.remove(s)
+
+            # melee attack
             death_box = player.get_attack_box()
             if death_box:
                 idx = death_box.collidelist(objects)
@@ -125,10 +149,20 @@ def main():
                     fading.add(obj)
                     objects.remove(obj)
                     fixed_sprites.remove(obj)
+                idx = death_box.collidelist([z.rect for z in zombies])
+                for zombie in zombies:
+                    if death_box.colliderect(zombie.rect):
+                        zombie.die()
+                        fading_zombies.add(zombie)
+                        zombies.remove(zombie)
 
+        # fade-outs
         for obj in fading:
             if obj.fade():
                 fading.remove(obj)
+        for z in fading_zombies:
+            if z.fade():
+                fading_zombies.remove(z)
 
         # screen.fill(BACKGROUND_COLOR)
         screen.blit(bg.image, bg.rect)
@@ -136,7 +170,8 @@ def main():
         destroyers.draw(screen)
         fading.draw(screen)
         player.draw(screen, debug)
-        zombie.draw(screen, debug)
+        for zombie in zombies.sprites() + fading_zombies.sprites():
+            zombie.draw(screen, debug)
 
         if debug:
             # show animation progression
