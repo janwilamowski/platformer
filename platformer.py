@@ -2,7 +2,7 @@
 
 """ TODO:
 - zombie rect is too large
-- health points/bar
+- damage shouldn't be bound to animations
 - sneak attack
 - zombie states: idle, following, attacking, dead
 - continuous animations while key is pressed?
@@ -138,9 +138,9 @@ def main():
                     fixed_sprites.remove(obj)
                 for zombie in zombies:
                     if s.rect.colliderect(zombie.rect):
-                        zombie.die()
-                        zombies.remove(zombie)
-                        fading_zombies.add(zombie)
+                        if zombie.suffer(50):
+                            zombies.remove(zombie)
+                            fading_zombies.add(zombie)
                         destroyers.remove(s)
 
             # melee attack
@@ -155,9 +155,9 @@ def main():
                 idx = death_box.collidelist([z.rect for z in zombies])
                 for zombie in zombies:
                     if death_box.colliderect(zombie.rect):
-                        zombie.die()
-                        fading_zombies.add(zombie)
-                        zombies.remove(zombie)
+                        if zombie.suffer(2):
+                            fading_zombies.add(zombie)
+                            zombies.remove(zombie)
 
         # fade-outs
         for obj in fading:

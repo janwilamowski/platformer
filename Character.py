@@ -48,6 +48,7 @@ class Character(pygame.sprite.Sprite):
         self.frozen = False
         self.hidden = False
         self.alpha = 255
+        self.hitpoints = 100
 
         self.callbacks = []
 
@@ -70,7 +71,7 @@ class Character(pygame.sprite.Sprite):
             for file_name in sorted(files):
                 image = pygame.image.load(file_name).convert_alpha()
                 h, l = image.get_rect()[-2:]
-                image = pygame.transform.scale(image, (h/4, l/4))
+                image = pygame.transform.scale(image, (h//4, l//4))
                 images[state].append(image)
         return images
 
@@ -130,6 +131,13 @@ class Character(pygame.sprite.Sprite):
         self.hidden = False
 
 
+    def suffer(self, damage):
+        self.hitpoints = max(self.hitpoints - damage, 0)
+        if self.hitpoints == 0:
+            self.die()
+        return self.hitpoints == 0
+
+
     def die(self):
         self.set_anim('Dead')
         self.velocity.x = self.velocity.y = 0
@@ -160,6 +168,11 @@ class Character(pygame.sprite.Sprite):
         elif 0 <= self.alpha < 255:
             image.fill((255, 255, 255, self.alpha), None, pygame.BLEND_RGBA_MULT)
         surface.blit(image, pos)
+        # hitpoint bar
+        if self.hitpoints > 0:
+            green_bar = pygame.Rect(0, 0, 80 * self.hitpoints // 100, 5)
+            green_bar.midbottom = pos.midtop
+            pygame.draw.rect(surface, pygame.Color('green'), green_bar)
         if debug:
             pygame.draw.rect(surface, pygame.Color('red'), pos, 1)
 
