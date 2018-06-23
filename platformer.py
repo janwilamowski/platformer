@@ -30,13 +30,13 @@ pg.display.set_icon(logo)
 SIZE = WIDTH, HEIGHT = 1000, 740
 BACKGROUND_COLOR = pg.Color('black')
 RED = pg.Color('red')
-FPS = 60
 
 screen = pg.display.set_mode(SIZE)
 clock = pg.time.Clock()
 
 
 def main():
+    FPS = 60
     bg = Background(SIZE)
     player = Ninja(position=(200, 100), screen=bg.rect)
     zombie = Zombie((100, 500), bg.rect, False)
@@ -65,6 +65,9 @@ def main():
                     sys.exit()
                 elif event.key == pg.K_F1:
                     debug = not debug
+                elif event.key == pg.K_F2:
+                    # slow motion
+                    FPS = 30 if FPS == 60 else 60
                 elif event.key == pg.K_RIGHT and not paused:
                     player.move_right()
                 elif event.key == pg.K_LEFT and not paused:
