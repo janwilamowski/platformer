@@ -39,8 +39,9 @@ def main():
     FPS = 60
     bg = Background(SIZE)
     player = Ninja(position=(200, 100), screen=bg.rect)
-    zombie = Zombie((100, 500), bg.rect, False)
-    zombies = pg.sprite.Group(zombie)
+    zombie1 = Zombie((100, 500), bg.rect, False)
+    zombie2 = Zombie((600, 500), bg.rect, True)
+    zombies = pg.sprite.Group(zombie1, zombie2)
     level, deco, objects = load_level()
     fixed_sprites = pg.sprite.Group(*level)
     fixed_sprites.add(*deco)
@@ -91,19 +92,21 @@ def main():
                 elif event.key == pg.K_p:
                     paused = not paused
                 elif event.key == pg.K_b:
-                    zombie.die()
+                    zombie1.die()
                 elif event.key == pg.K_a:
-                    zombie.attack()
+                    zombie1.attack()
                 elif event.key == pg.K_s:
                     # stealth mode
                     player.toggle_hide()
                 elif event.key == pg.K_r:
                     # reset
-                    player.state = zombie.state = 'Idle'
-                    player.frozen = zombie.frozen = False
+                    for char in zombies.sprites() + [player]:
+                        char.state = 'Idle'
+                        char.frozen = char.hidden = False
                     player.rect.x, player.rect.y = (200, 100)
-                    zombie = Zombie((100, 500), bg.rect, False)
-                    zombies = pg.sprite.Group(zombie)
+                    zombie1 = Zombie((100, 500), bg.rect, False)
+                    zombie2 = Zombie((600, 500), bg.rect, True)
+                    zombies = pg.sprite.Group(zombie1, zombie2)
                     level, deco, objects = load_level()
                     fixed_sprites = pg.sprite.Group(*level)
                     fixed_sprites.add(*deco)

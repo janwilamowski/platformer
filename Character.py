@@ -1,7 +1,11 @@
 import os, glob
+from enum import Enum
 import pygame
 
 FALL_SPEED = 8
+
+
+Dir = Enum('Direction', 'right left up down')
 
 
 class Vector2():
@@ -84,7 +88,9 @@ class Character(pygame.sprite.Sprite):
     def fall(self, level):
         if self.state == 'Climb': return
 
-        if self.rect.collidelist(level) != -1:
+        if any(block.collidepoint(p)
+                for block in level
+                for p in (self.rect.bottomleft, self.rect.bottomright)):
             self.velocity.y = 0
         else:
             self.velocity.y = FALL_SPEED / 4 if self.state == 'Glide' else FALL_SPEED
@@ -222,25 +228,34 @@ class Character(pygame.sprite.Sprite):
                             self.state = self.previous_state
 
         # collision detection
+        self.collisions = []
         self.rect.move_ip(self.velocity.x, 0)
         for block in level:
             if block.colliderect(self.rect):
                 if self.facing_right:
                     self.rect.right = block.left
+                    self.collisions.append(Dir.right)
                 else:
                     self.rect.left = block.right
+                    self.collisions.append(Dir.left)
         self.rect.move_ip(0, self.velocity.y)
         for block in level:
             if block.colliderect(self.rect):
                 if self.velocity.y > 0: # moving down
                     self.rect.bottom = block.top
+                    self.collisions.append(Dir.down)
                 else: # moving up
                     self.rect.top = block.bottom
+                    self.collisions.append(Dir.up)
+                self.velocity.y = 0
 
         # correct if off screen
         if self.rect.x < 0:
             self.rect.x = 0
+            self.collisions.append(Dir.left)
         elif self.rect.x > self.screen.w - self.rect.w:
             self.rect.x = self.screen.w - self.rect.w
+            self.collisions.append(Dir.right)
         if self.rect.y < 0:
             self.rect.y = 0
+            self.collisions.append(Dir.up)
