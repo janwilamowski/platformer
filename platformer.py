@@ -50,6 +50,7 @@ def main():
     blocks = [block.rect for block in level]
     fading = pg.sprite.Group()
     fading_zombies = pg.sprite.Group()
+    screenshot_counter = 0
 
     debug = False
     running = True
@@ -69,6 +70,10 @@ def main():
                 elif event.key == pg.K_F2:
                     # slow motion
                     FPS = 30 if FPS == 60 else 60
+                elif event.key == pg.K_F12:
+                    filename = "screenshot{c}.jpg".format(c=screenshot_counter)
+                    screenshot_counter += 1
+                    pg.image.save(screen, filename)
                 elif event.key == pg.K_RIGHT and not paused:
                     player.move_right()
                 elif event.key == pg.K_LEFT and not paused:
