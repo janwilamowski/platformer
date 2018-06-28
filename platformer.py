@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 """ TODO:
-- zombie rect is too large
+- female zombie rect is too large
 - damage shouldn't be bound to animations
 - sneak attack
 - zombie states: idle, following, attacking, dead
 - continuous animations while key is pressed?
 - fix ninja box displacement on animation change (attack, throw) -> restore to center? individual per animation type?
-- fix double jump
 - have objects fall
 - walking interferes with animations
 - level bigger than screen & scrolling

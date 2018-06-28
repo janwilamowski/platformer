@@ -48,6 +48,7 @@ class Character(pygame.sprite.Sprite):
         self.previous_state = 'Idle'
 
         self.facing_right = True
+        self.on_ground = False
         self.current_animation = None
         self.frozen = False
         self.hidden = False
@@ -88,12 +89,7 @@ class Character(pygame.sprite.Sprite):
     def fall(self, level):
         if self.state == 'Climb': return
 
-        if any(block.collidepoint(p)
-                for block in level
-                for p in (self.rect.bottomleft, self.rect.bottomright)):
-            self.velocity.y = 0
-        else:
-            self.velocity.y = FALL_SPEED / 4 if self.state == 'Glide' else FALL_SPEED
+        self.velocity.y = FALL_SPEED / 4 if self.state == 'Glide' else FALL_SPEED
 
 
     def move_right(self):
@@ -227,6 +223,7 @@ class Character(pygame.sprite.Sprite):
                             self.current_animation = None
                             self.state = self.previous_state
 
+        self.on_ground = self.velocity.y == 0
         # collision detection
         self.collisions = []
         self.rect.move_ip(self.velocity.x, 0)
@@ -244,6 +241,7 @@ class Character(pygame.sprite.Sprite):
                 if self.velocity.y > 0: # moving down
                     self.rect.bottom = block.top
                     self.collisions.append(Dir.down)
+                    self.on_ground = True
                 else: # moving up
                     self.rect.top = block.bottom
                     self.collisions.append(Dir.up)

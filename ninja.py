@@ -34,8 +34,7 @@ class Ninja(Character):
 
 
     def jump(self):
-        if self.current_animation: return
-        # TODO: only allow if on ground
+        if self.current_animation or not self.on_ground: return
 
         self.set_anim('Jump')
         # TODO: delays animation
@@ -61,6 +60,6 @@ class Ninja(Character):
 
 
     def glide(self, level):
-        if self.rect.collidelistall(level): return
+        if self.on_ground: return
 
         self.set_anim('Glide')
