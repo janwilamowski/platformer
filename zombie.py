@@ -1,4 +1,4 @@
-from Character import Character, Dir
+from character import Character, Dir
 
 zombie_states = [
     'Idle',

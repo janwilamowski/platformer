@@ -1,5 +1,5 @@
 from sprites import Kunai
-from Character import Character
+from character import Character
 
 
 player_states = [

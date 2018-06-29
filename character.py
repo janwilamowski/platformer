@@ -154,7 +154,7 @@ class Character(pygame.sprite.Sprite):
         return self.alpha <= 0
 
 
-    def draw(self, surface, debug=False):
+    def draw(self, surface, camera, debug=False):
         pos = self.rect
         img_width = self.image.get_rect().width
         # TODO: some of the sprites have a margin
@@ -169,14 +169,14 @@ class Character(pygame.sprite.Sprite):
             image.fill((255, 255, 255, alpha), None, pygame.BLEND_RGBA_MULT)
         elif 0 <= self.alpha < 255:
             image.fill((255, 255, 255, self.alpha), None, pygame.BLEND_RGBA_MULT)
-        surface.blit(image, pos)
+        surface.blit(image, camera.apply_rect(pos))
         # hitpoint bar
         if self.hitpoints > 0:
             green_bar = pygame.Rect(0, 0, 80 * self.hitpoints // 100, 5)
             green_bar.midbottom = pos.midtop
-            pygame.draw.rect(surface, pygame.Color('green'), green_bar)
+            pygame.draw.rect(surface, pygame.Color('green'), camera.apply_rect(green_bar))
         if debug:
-            pygame.draw.rect(surface, pygame.Color('red'), pos, 1)
+            pygame.draw.rect(surface, pygame.Color('red'), camera.apply_rect(pos), 1)
 
 
     def get_anim(self):

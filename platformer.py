@@ -19,6 +19,7 @@ import pygame as pg
 from sprites import Background, load_level
 from ninja import Ninja
 from zombie import Zombie
+from camera import Camera
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "366,0"
 pg.init()
@@ -50,6 +51,7 @@ def main():
     fading = pg.sprite.Group()
     fading_zombies = pg.sprite.Group()
     screenshot_counter = 0
+    camera = Camera()
 
     debug = False
     running = True
@@ -73,6 +75,10 @@ def main():
                     filename = "screenshot{c}.jpg".format(c=screenshot_counter)
                     screenshot_counter += 1
                     pg.image.save(screen, filename)
+                elif event.key == pg.K_PAGEDOWN:
+                    camera.move(-100, 0)
+                elif event.key == pg.K_PAGEUP:
+                    camera.move(100, 0)
                 elif event.key == pg.K_RIGHT and not paused:
                     player.move_right()
                 elif event.key == pg.K_LEFT and not paused:
@@ -115,6 +121,7 @@ def main():
                     fixed_sprites = pg.sprite.Group(*level)
                     fixed_sprites.add(*deco)
                     fixed_sprites.add(*objects)
+                    camera.reset()
             elif event.type == pg.KEYUP and not paused:
                 if event.key in (pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN):
                     player.stop()
@@ -175,13 +182,20 @@ def main():
                 fading_zombies.remove(z)
 
         # screen.fill(BACKGROUND_COLOR)
-        screen.blit(bg.image, bg.rect)
-        fixed_sprites.draw(screen)
-        destroyers.draw(screen)
-        fading.draw(screen)
-        player.draw(screen, debug)
+        bg_rect = camera.apply(bg) # TODO: % SCREEN_WIDTH
+        screen.blit(bg.image, bg_rect)
+        screen.blit(bg.image, bg_rect.move(bg_rect.width, 0))
+        screen.blit(bg.image, bg_rect.move(-bg_rect.width, 0))
+
+        for sprite in fixed_sprites:
+            screen.blit(sprite.image, camera.apply(sprite))
+        for sprite in destroyers:
+            screen.blit(sprite.image, camera.apply(sprite))
+        for sprite in fading:
+            screen.blit(sprite.image, camera.apply(sprite))
+        player.draw(screen, camera, debug)
         for zombie in zombies.sprites() + fading_zombies.sprites():
-            zombie.draw(screen, debug)
+            zombie.draw(screen, camera, debug)
 
         if debug:
             # show animation progression
@@ -198,19 +212,19 @@ def main():
                 if i == idx + 1:
                     pg.draw.rect(screen, RED, rect, 1)
 
-            pg.draw.rect(screen, RED, player.rect, 1)
-            for s in fixed_sprites.sprites() + destroyers.sprites():
-                pg.draw.rect(screen, RED, s.rect, 1)
+            pg.draw.rect(screen, RED, camera.apply(player), 1)
+            for sprite in fixed_sprites.sprites() + destroyers.sprites():
+                pg.draw.rect(screen, RED, camera.apply(sprite), 1)
 
             if player.current_animation == 'Attack':
                 r = player.rect.h // 2
                 top = player.rect.top
                 x = player.rect.right if player.facing_right else player.rect.left
                 y = top + r
-                pg.draw.circle(screen, RED, (x, y), r, 1)
+                pg.draw.circle(screen, RED, camera.apply_coords( (x, y) ), r, 1)
                 death_box = player.get_attack_box()
                 if death_box:
-                    pg.draw.rect(screen, RED, death_box, 1)
+                    pg.draw.rect(screen, RED, camera.apply_rect(death_box), 1)
 
         pg.display.update()
 
