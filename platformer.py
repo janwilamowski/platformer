@@ -43,13 +43,11 @@ def main():
     zombie2 = Zombie((600, 500), bg.rect, True)
     zombies = pg.sprite.Group(zombie1, zombie2)
     level, deco, objects = load_level()
-    fixed_sprites = pg.sprite.Group(*level)
-    fixed_sprites.add(*deco)
-    fixed_sprites.add(*objects)
+    fixed_sprites = level + deco + objects
     destroyers = pg.sprite.Group()
     blocks = [block.rect for block in level]
-    fading = pg.sprite.Group()
-    fading_zombies = pg.sprite.Group()
+    fading = []
+    fading_zombies = []
     screenshot_counter = 0
     camera = Camera()
 
@@ -118,9 +116,7 @@ def main():
                     zombie2 = Zombie((600, 500), bg.rect, True)
                     zombies = pg.sprite.Group(zombie1, zombie2)
                     level, deco, objects = load_level()
-                    fixed_sprites = pg.sprite.Group(*level)
-                    fixed_sprites.add(*deco)
-                    fixed_sprites.add(*objects)
+                    fixed_sprites = level + deco + objects
                     camera.reset()
             elif event.type == pg.KEYUP and not paused:
                 if event.key in (pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN):
@@ -147,14 +143,14 @@ def main():
                 if idx != -1:
                     destroyers.remove(s)
                     obj = objects[idx]
-                    fading.add(obj)
+                    fading.append(obj)
                     objects.remove(obj)
                     fixed_sprites.remove(obj)
                 for zombie in zombies:
                     if s.rect.colliderect(zombie.rect):
                         if zombie.suffer(50):
                             zombies.remove(zombie)
-                            fading_zombies.add(zombie)
+                            fading_zombies.append(zombie)
                         destroyers.remove(s)
 
             # melee attack
@@ -163,38 +159,34 @@ def main():
                 idx = death_box.collidelist(objects)
                 if idx != -1:
                     obj = objects[idx]
-                    fading.add(obj)
+                    fading.append(obj)
                     objects.remove(obj)
                     fixed_sprites.remove(obj)
                 idx = death_box.collidelist([z.rect for z in zombies])
                 for zombie in zombies:
                     if death_box.colliderect(zombie.rect):
                         if zombie.suffer(2):
-                            fading_zombies.add(zombie)
+                            fading_zombies.append(zombie)
                             zombies.remove(zombie)
 
         # fade-outs
-        for obj in fading:
-            if obj.fade():
-                fading.remove(obj)
-        for z in fading_zombies:
-            if z.fade():
-                fading_zombies.remove(z)
+        fading = [obj for obj in fading if not obj.fade()]
+        fading_zombies = [z for z in fading_zombies if not z.fade()]
 
         # screen.fill(BACKGROUND_COLOR)
-        bg_rect = camera.apply(bg) # TODO: % SCREEN_WIDTH
+        bg_rect = camera.apply(bg)
+        bg_rect.x %= WIDTH
+        bg_rect.y %= HEIGHT
         screen.blit(bg.image, bg_rect)
         screen.blit(bg.image, bg_rect.move(bg_rect.width, 0))
         screen.blit(bg.image, bg_rect.move(-bg_rect.width, 0))
 
-        for sprite in fixed_sprites:
+        for sprite in fixed_sprites + fading:
             screen.blit(sprite.image, camera.apply(sprite))
         for sprite in destroyers:
             screen.blit(sprite.image, camera.apply(sprite))
-        for sprite in fading:
-            screen.blit(sprite.image, camera.apply(sprite))
         player.draw(screen, camera, debug)
-        for zombie in zombies.sprites() + fading_zombies.sprites():
+        for zombie in zombies.sprites() + fading_zombies:
             zombie.draw(screen, camera, debug)
 
         if debug:
@@ -213,7 +205,7 @@ def main():
                     pg.draw.rect(screen, RED, rect, 1)
 
             pg.draw.rect(screen, RED, camera.apply(player), 1)
-            for sprite in fixed_sprites.sprites() + destroyers.sprites():
+            for sprite in fixed_sprites + destroyers.sprites():
                 pg.draw.rect(screen, RED, camera.apply(sprite), 1)
 
             if player.current_animation == 'Attack':
