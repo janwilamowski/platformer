@@ -29,9 +29,9 @@ LEVEL = """
 class Background(pygame.sprite.Sprite):
     def __init__(self, screen_size):
         super( Background, self).__init__()
-        image = pygame.image.load('./gfx/bg.png').convert()
-        self.image = pygame.transform.scale(image, screen_size)
+        self.image = pygame.image.load('./gfx/bg.png').convert()
         self.rect = self.image.get_rect()
+        self.rect.top = screen_size[1] - self.rect.h
 
 
 def hex2dec(hex_str):

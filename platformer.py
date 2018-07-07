@@ -78,6 +78,10 @@ def main():
                     camera.move(-100, 0)
                 elif event.key == pg.K_PAGEUP:
                     camera.move(100, 0)
+                elif event.key == pg.K_HOME:
+                    camera.move(0, 100)
+                elif event.key == pg.K_END:
+                    camera.move(0, -100)
                 elif event.key == pg.K_RIGHT and not paused:
                     player.move_right()
                 elif event.key == pg.K_LEFT and not paused:
@@ -174,10 +178,11 @@ def main():
         fading = [obj for obj in fading if not obj.fade()]
         fading_zombies = [z for z in fading_zombies if not z.fade()]
 
-        # screen.fill(BACKGROUND_COLOR)
+        screen.fill(BACKGROUND_COLOR)
         bg_rect = camera.apply(bg)
         bg_rect.x %= WIDTH
-        bg_rect.y %= HEIGHT
+        bg_rect.y = max(bg_rect.y, HEIGHT - bg_rect.h)
+        bg_rect.y = min(bg_rect.y, 0)
         screen.blit(bg.image, bg_rect)
         screen.blit(bg.image, bg_rect.move(bg_rect.width, 0))
         screen.blit(bg.image, bg_rect.move(-bg_rect.width, 0))
