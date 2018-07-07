@@ -22,7 +22,7 @@ class Kunai(pygame.sprite.Sprite):
         self.frozen = True
 
 
-    def update(self, level):
+    def update(self, level, camera=None):
         """ Returns True if we're off screen and False otherwise """
         if self.frozen: return
 
@@ -37,4 +37,5 @@ class Kunai(pygame.sprite.Sprite):
         self.counter += 1
 
         hit = any(self.rect.colliderect(block) for block in level)
-        return hit or self.rect.x > self.screen.w or self.rect.right < 0
+        left, top = camera.pos.topleft if camera else (0, 0)
+        return hit or self.rect.x > -left + self.screen.w or self.rect.right < -left

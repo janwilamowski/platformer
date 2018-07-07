@@ -9,7 +9,8 @@
 - fix ninja box displacement on animation change (attack, throw) -> restore to center? individual per animation type?
 - have objects fall
 - walking interferes with animations
-- level bigger than screen & scrolling
+- level bigger than screen & initial camera offset
+- scrolling displaces player -> autoscroll when player moves
 """
 
 from __future__ import print_function, division
@@ -137,7 +138,7 @@ def main():
 
             # ranged attacks
             for s in destroyers:
-                if s.update(blocks):
+                if s.update(blocks, camera):
                     destroyers.remove(s)
                 idx = s.rect.collidelist(objects)
                 if idx != -1:
