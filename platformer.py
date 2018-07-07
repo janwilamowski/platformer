@@ -10,6 +10,7 @@
 - have objects fall
 - walking interferes with animations
 - level bigger than screen & initial camera offset
+- minimap
 - scrolling displaces player -> autoscroll when player moves
 """
 
@@ -55,6 +56,8 @@ def main():
     debug = False
     running = True
     paused = False
+    shift = False
+
     while running:
 
         dt = clock.tick(FPS) / 1000  # Amount of seconds between each loop.
@@ -74,22 +77,28 @@ def main():
                     filename = "screenshot{c}.jpg".format(c=screenshot_counter)
                     screenshot_counter += 1
                     pg.image.save(screen, filename)
-                elif event.key == pg.K_PAGEDOWN:
-                    camera.move(-100, 0)
-                elif event.key == pg.K_PAGEUP:
-                    camera.move(100, 0)
-                elif event.key == pg.K_HOME:
-                    camera.move(0, 100)
-                elif event.key == pg.K_END:
-                    camera.move(0, -100)
-                elif event.key == pg.K_RIGHT and not paused:
-                    player.move_right()
+                elif event.key in (pg.K_LSHIFT, pg.K_RSHIFT):
+                    shift = True
+                elif event.key == pg.K_RIGHT:
+                    if shift:
+                        camera.move(-100, 0)
+                    elif not paused:
+                        player.move_right()
                 elif event.key == pg.K_LEFT and not paused:
-                    player.move_left()
+                    if shift:
+                        camera.move(100, 0)
+                    elif not paused:
+                        player.move_left()
                 elif event.key == pg.K_UP and not paused:
-                    player.move_up()
+                    if shift:
+                        camera.move(0, 100)
+                    elif not paused:
+                        player.move_up()
                 elif event.key == pg.K_DOWN and not paused:
-                    player.move_down()
+                    if shift:
+                        camera.move(0, -100)
+                    elif not paused:
+                        player.move_down()
                 elif event.key == pg.K_SPACE and not paused:
                     player.jump()
                 elif event.key == pg.K_LCTRL and not paused:
@@ -123,8 +132,10 @@ def main():
                     level, deco, objects = load_level()
                     fixed_sprites = level + deco + objects
                     camera.reset()
-            elif event.type == pg.KEYUP and not paused:
-                if event.key in (pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN):
+            elif event.type == pg.KEYUP:
+                if event.key in (pg.K_LSHIFT, pg.K_RSHIFT):
+                    shift = False
+                elif event.key in (pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN) and not paused:
                     player.stop()
                 # elif event.key == pg.K_DOWN or event.key == pg.K_UP:
                 #     player.velocity.y = 0
