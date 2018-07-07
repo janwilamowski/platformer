@@ -1,7 +1,29 @@
 import pygame
 
+# one level block is 64x64px, platforms are 64x46
+# we use half steps in the level set up to fill the gaps
+
 LEVEL = """
 
+
+
+
+
+                    D E E E F
+
+
+
+
+
+     D E E E E E F
+           4
+
+           4
+                        0 2
+           4
+                        3 5
+           4
+1 1 1 1 6 7 9 A 1 1 1 6 7 9 A 1
 """
 
 class Background(pygame.sprite.Sprite):
@@ -12,76 +34,31 @@ class Background(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 
+def hex2dec(hex_str):
+    return int(hex_str, 16)
+
+
 def load_level():
     images = []
+    for y, line in enumerate(LEVEL.splitlines()):
+        for x, block in enumerate(line):
+            if not block.strip(): continue
+            img = LevelBlock(hex2dec(block), (x*32, y*32))
+            images.append(img)
+
     deco = []
     objects = []
     # ground level
-    x = 0
-    y = 660
-    for i in range(16):
-        if i == 4:
-            block = '7'
-        elif i == 5:
-            block = '8'
-        elif i == 6:
-            block = '10'
-        elif i == 7:
-            block = '11'
-        elif i == 11:
-            block = '7'
-        elif i == 12:
-            block = '8'
-        elif i == 13:
-            block = '10'
-        elif i == 14:
-            block = '11'
-        else:
-            block = '2'
-        img = LevelBlock(block, (x, y))
-        images.append(img)
-        x += 64
-    deco.append( Decoration('stone', (120, 588)))
-    deco.append( Decoration('cactus1', (600, 550)))
-
-    # hill
-    images.append( LevelBlock('4', (768, 596)) )
-    images.append( LevelBlock('6', (832, 596)) )
-    images.append( LevelBlock('1', (768, 532)) )
-    images.append( LevelBlock('3', (832, 532)) )
+    deco.append( Decoration('stone', (120, 568)))
+    deco.append( Decoration('cactus1', (600, 530)))
 
     # first floor
-    x = 96
-    y = 404
-    blocks = ('14', '15', '15', '15', '15', '15', '16')
-    for block in blocks:
-        x += 64
-        images.append( LevelBlock(block, (x, y)) )
-
-    x -= 192
-    y += 40 # needs some overlap because we don't have a fitting tile
-    images.append( LevelBlock('5', (x, y)) )
-    y += 64
-    images.append( LevelBlock('5', (x, y)) )
-    y += 64
-    images.append( LevelBlock('5', (x, y)) )
-    y += 64
-    images.append( LevelBlock('5', (x, y)) )
-    objects.append( Crate( (450, 354) ) )
-    objects.append( Crate( (500, 354) ) )
-    objects.append( Crate( (475, 304) ) )
+    objects.append( Crate( (450, 334) ) )
+    objects.append( Crate( (500, 334) ) )
+    objects.append( Crate( (475, 284) ) )
 
     # second floor
-    x = 600
-    y = 180
-    images.append( LevelBlock('14', (x, y)) )
-    x += 64
-    for i in range(3):
-        img = LevelBlock('15', (x, y))
-        images.append(img)
-        x += 64
-    images.append( LevelBlock('16', (x, y)) )
-    deco.append( Decoration('skeleton', (700, 132)))
+    deco.append( Decoration('skeleton', (700, 144)))
 
     return images, deco, objects
 

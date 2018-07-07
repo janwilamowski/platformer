@@ -27,7 +27,7 @@ pg.init()
 logo = pg.image.load('./gfx/logo.png')
 pg.display.set_icon(logo)
 
-SIZE = WIDTH, HEIGHT = 1000, 740
+SIZE = WIDTH, HEIGHT = 1000, 704
 BACKGROUND_COLOR = pg.Color('black')
 RED = pg.Color('red')
 
