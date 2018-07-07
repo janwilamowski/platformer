@@ -195,7 +195,7 @@ class Character(pygame.sprite.Sprite):
         return rect
 
 
-    def update(self, level):
+    def update(self, level, camera=None):
         """
         Updates the image of Sprite every 6 frame (approximately every 0.1 second if frame rate is 60).
         """
@@ -248,12 +248,13 @@ class Character(pygame.sprite.Sprite):
                 self.velocity.y = 0
 
         # correct if off screen
-        if self.rect.x < 0:
-            self.rect.x = 0
+        left, top = camera.pos.topleft if camera else (0, 0)
+        if self.rect.x < -left:
+            self.rect.x = -left
             self.collisions.append(Dir.left)
-        elif self.rect.x > self.screen.w - self.rect.w:
-            self.rect.x = self.screen.w - self.rect.w
+        elif self.rect.x > -left + self.screen.w - self.rect.w:
+            self.rect.x = -left + self.screen.w - self.rect.w
             self.collisions.append(Dir.right)
-        if self.rect.y < 0:
-            self.rect.y = 0
+        if self.rect.y < -top:
+            self.rect.y = -top
             self.collisions.append(Dir.up)

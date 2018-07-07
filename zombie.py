@@ -16,8 +16,8 @@ class Zombie(Character):
         self.velocity.x = 1
 
 
-    def update(self, level):
-        super(Zombie, self).update(level)
+    def update(self, level, camera=None):
+        super(Zombie, self).update(level, camera)
         if Dir.right in self.collisions or Dir.left in self.collisions:
             # bumped into something, turn around
             self.facing_right = not self.facing_right

@@ -129,7 +129,7 @@ def main():
             player.fall(blocks)
             for zombie in zombies:
                 zombie.fall(blocks)
-            player.update(blocks + [o.rect for o in objects + zombies.sprites()])
+            player.update(blocks + [o.rect for o in objects + zombies.sprites()], camera)
             for zombie in zombies:
                 zombie.update(blocks + [o.rect for o in objects + [player]])
             for zombie in fading_zombies:
