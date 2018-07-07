@@ -1,4 +1,4 @@
-from sprites import Kunai
+from kunai import Kunai
 from character import Character
 
 

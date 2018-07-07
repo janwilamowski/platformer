@@ -16,7 +16,7 @@ from __future__ import print_function, division
 import sys, os
 from collections import namedtuple
 import pygame as pg
-from sprites import Background, load_level
+from level import load_level, Background
 from ninja import Ninja
 from zombie import Zombie
 from camera import Camera
