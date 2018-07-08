@@ -9,7 +9,7 @@
 - fix ninja box displacement on animation change (attack, throw) -> restore to center? individual per animation type?
 - have objects fall
 - walking interferes with animations
-- level bigger than screen & initial camera offset
+- left edge is constrained but right edge isn't
 - minimap
 - scrolling displaces player -> autoscroll when player moves
 """
@@ -44,14 +44,16 @@ def main():
     zombie1 = Zombie((100, 500), bg.rect, False)
     zombie2 = Zombie((600, 500), bg.rect, True)
     zombies = pg.sprite.Group(zombie1, zombie2)
-    level, deco, objects = load_level()
+    level, deco, objects, level_rect = load_level()
     fixed_sprites = level + deco + objects
     destroyers = pg.sprite.Group()
     blocks = [block.rect for block in level]
     fading = []
     fading_zombies = []
     screenshot_counter = 0
-    camera = Camera()
+    camera = Camera(w=WIDTH, h=HEIGHT)
+    camera.pos.center = level_rect.center
+    camera.pos.bottom = level_rect.bottom
 
     debug = False
     running = True
@@ -81,22 +83,22 @@ def main():
                     shift = True
                 elif event.key == pg.K_RIGHT:
                     if shift:
-                        camera.move(-100, 0)
+                        camera.move(100, 0)
                     elif not paused:
                         player.move_right()
                 elif event.key == pg.K_LEFT and not paused:
                     if shift:
-                        camera.move(100, 0)
+                        camera.move(-100, 0)
                     elif not paused:
                         player.move_left()
                 elif event.key == pg.K_UP and not paused:
                     if shift:
-                        camera.move(0, 100)
+                        camera.move(0, -100)
                     elif not paused:
                         player.move_up()
                 elif event.key == pg.K_DOWN and not paused:
                     if shift:
-                        camera.move(0, -100)
+                        camera.move(0, 100)
                     elif not paused:
                         player.move_down()
                 elif event.key == pg.K_SPACE and not paused:
@@ -129,9 +131,10 @@ def main():
                     zombie1 = Zombie((100, 500), bg.rect, False)
                     zombie2 = Zombie((600, 500), bg.rect, True)
                     zombies = pg.sprite.Group(zombie1, zombie2)
-                    level, deco, objects = load_level()
+                    level, deco, objects, _ = load_level()
                     fixed_sprites = level + deco + objects
                     camera.reset()
+                    # reset()
             elif event.type == pg.KEYUP:
                 if event.key in (pg.K_LSHIFT, pg.K_RSHIFT):
                     shift = False
@@ -189,6 +192,7 @@ def main():
         fading = [obj for obj in fading if not obj.fade()]
         fading_zombies = [z for z in fading_zombies if not z.fade()]
 
+        # scrolling background
         screen.fill(BACKGROUND_COLOR)
         bg_rect = camera.apply(bg)
         bg_rect.x %= WIDTH
@@ -198,6 +202,7 @@ def main():
         screen.blit(bg.image, bg_rect.move(bg_rect.width, 0))
         screen.blit(bg.image, bg_rect.move(-bg_rect.width, 0))
 
+        # draw sprites
         for sprite in fixed_sprites + fading:
             screen.blit(sprite.image, camera.apply(sprite))
         for sprite in destroyers:

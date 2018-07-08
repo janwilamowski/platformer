@@ -19,11 +19,11 @@ LEVEL = """
            4
 
            4
-                        0 2
+                        0 2             0 2
            4
-                        3 5
+                        3 5             3 5
            4
-1 1 1 1 6 7 9 A 1 1 1 6 7 9 A 1
+0 1 1 1 6 7 9 A 1 1 1 6 7 9 A 1 1 1 1 6 7 9 A 2
 """
 
 class Background(pygame.sprite.Sprite):
@@ -45,6 +45,7 @@ def load_level():
             if not block.strip(): continue
             img = LevelBlock(hex2dec(block), (x*32, y*32))
             images.append(img)
+    level_size = (x+2)*32, (y+2)*32
 
     deco = []
     objects = []
@@ -60,7 +61,7 @@ def load_level():
     # second floor
     deco.append( Decoration('skeleton', (700, 144)))
 
-    return images, deco, objects
+    return images, deco, objects, pygame.Rect((0, 0), level_size)
 
 
 class LevelBlock(pygame.sprite.Sprite):

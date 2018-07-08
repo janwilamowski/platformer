@@ -249,12 +249,12 @@ class Character(pygame.sprite.Sprite):
 
         # correct if off screen
         left, top = camera.pos.topleft if camera else (0, 0)
-        if self.rect.x < -left:
-            self.rect.x = -left
+        if self.rect.x < left:
+            self.rect.x = left
             self.collisions.append(Dir.left)
-        elif self.rect.x > -left + self.screen.w - self.rect.w:
-            self.rect.x = -left + self.screen.w - self.rect.w
+        elif self.rect.x > left + self.screen.w - self.rect.w:
+            self.rect.x = left + self.screen.w - self.rect.w
             self.collisions.append(Dir.right)
-        if self.rect.y < -top:
-            self.rect.y = -top
+        if self.rect.y < top:
+            self.rect.y = top
             self.collisions.append(Dir.up)
