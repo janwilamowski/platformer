@@ -31,6 +31,7 @@ class Character(pygame.sprite.Sprite):
 
         size = (60, 110)  # This should match the size of the images.
         self.states = states
+        self.initial_pos = position
 
         # self.rect = pygame.Rect(position, size)
         self.all_images = self.load_images(img_path)
@@ -56,6 +57,13 @@ class Character(pygame.sprite.Sprite):
         self.hitpoints = 100
 
         self.callbacks = []
+
+
+    def reset(self):
+        self.frozen = self.hidden = False
+        self.state = 'Idle'
+        self.hitpoints = 100
+        self.rect.x, self.rect.y = self.initial_pos
 
 
     def load_images(self, path, pattern=None):
@@ -86,7 +94,7 @@ class Character(pygame.sprite.Sprite):
         self.index = 0
 
 
-    def fall(self, level):
+    def fall(self):
         if self.state == 'Climb': return
 
         self.velocity.y = FALL_SPEED / 4 if self.state == 'Glide' else FALL_SPEED

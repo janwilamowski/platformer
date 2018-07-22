@@ -59,7 +59,7 @@ class Ninja(Character):
         return kunai
 
 
-    def glide(self, level):
+    def glide(self):
         if self.on_ground: return
 
         self.set_anim('Glide')
