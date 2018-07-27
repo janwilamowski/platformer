@@ -12,7 +12,7 @@
 - walking interferes with animations
 - left edge is constrained but right edge isn't
 - minimap
-- scrolling displaces player -> autoscroll when player moves
+- scrolling displaces player
 """
 
 from __future__ import print_function, division
@@ -45,6 +45,7 @@ class Game(object):
         self.paused = False
         self.debug = False
         self.shift = False
+        self.follow = False
         self.FPS = 60
         self.bg = Background(SIZE)
         self.camera = Camera(w=WIDTH, h=HEIGHT)
@@ -73,6 +74,7 @@ class Game(object):
         self.blocks.extend( [block.rect for block in level] )
         self.camera.pos.center = level_rect.center
         self.camera.pos.bottom = level_rect.bottom
+        self.level_rect = level_rect
         # self.camera.reset()
 
 
@@ -82,6 +84,10 @@ class Game(object):
 
     def toggle_paused(self):
         self.paused = not self.paused
+
+
+    def toggle_follow(self):
+        self.follow = not self.follow
 
 
     def toggle_slomo(self):
@@ -132,6 +138,10 @@ class Game(object):
 
 
     def draw(self):
+        if self.follow:
+            cam = self.camera.pos
+            cam.center = self.player.rect.center
+            cam.bottom = min(cam.bottom, self.level_rect.bottom)
         # scrolling background
         self.screen.fill(BACKGROUND_COLOR)
         bg_rect = self.camera.apply(self.bg)
@@ -169,6 +179,7 @@ class Game(object):
                 pg.K_ESCAPE: sys.exit,
                 pg.K_F1: self.toggle_debug,
                 pg.K_F2: self.toggle_slomo,
+                pg.K_F3: self.toggle_follow,
                 pg.K_F12: self.screenshot,
                 pg.K_RIGHT: self.right,
                 pg.K_LEFT: self.left,
