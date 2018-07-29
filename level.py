@@ -9,7 +9,7 @@ LEVEL = """
 
 
 
-                    D E E E F
+                    D E E E F         D E E E F
 
 
 
@@ -64,38 +64,49 @@ def load_level():
     return images, deco, objects, pygame.Rect((0, 0), level_size)
 
 
-class LevelBlock(pygame.sprite.Sprite):
+class LevelSprite(pygame.sprite.Sprite):
+
+    def __init__(self, filename, pos, scale_factor=None):
+        super(LevelSprite, self).__init__()
+        image = pygame.image.load(filename).convert_alpha()
+
+        self.rect = image.get_rect()
+        if scale_factor:
+            self.rect.inflate_ip(self.rect.w * scale_factor, self.rect.h * scale_factor)
+            self.image = pygame.transform.scale(image, self.rect[-2:])
+        else:
+            self.image = image
+        self.rect.x, self.rect.y = pos
+
+        # smaller version for mini map
+        map_scale_factor = -0.5
+        self.map_rect = self.rect.copy()
+        self.map_rect.inflate_ip(self.map_rect.w * map_scale_factor, self.map_rect.h * map_scale_factor)
+        self.map_rect.x, self.map_rect.y = (-map_scale_factor*p for p in pos)
+        self.map_image = pygame.transform.scale(image, self.map_rect[-2:])
+
+
+class LevelBlock(LevelSprite):
 
     def __init__(self, tile, pos):
-        super( LevelBlock, self).__init__()
+        filename = './gfx/tiles/{}.png'.format(tile)
         scale_factor = -0.5
-        image = pygame.image.load('./gfx/tiles/{}.png'.format(tile)).convert_alpha()
-        self.rect = image.get_rect()
-        self.rect.inflate_ip(self.rect.w * scale_factor, self.rect.h * scale_factor)
-        self.image = pygame.transform.scale(image, self.rect[-2:])
-        self.rect.x, self.rect.y = pos
+        super(LevelBlock, self).__init__(filename, pos, scale_factor)
 
 
-class Decoration(pygame.sprite.Sprite):
+class Decoration(LevelSprite):
 
     def __init__(self, name, pos):
-        super(Decoration, self).__init__()
-        self.image = pygame.image.load('./gfx/objects/{}.png'.format(name)).convert_alpha()
-        self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = pos
+        filename = './gfx/objects/{}.png'.format(name)
+        super(Decoration, self).__init__(filename, pos)
 
 
-class Crate(pygame.sprite.Sprite):
+class Crate(LevelSprite):
 
     def __init__(self, pos):
-        super(Crate, self).__init__()
         scale_factor = -0.5
-        image = pygame.image.load('./gfx/objects/crate.png').convert()
-        self.rect = image.get_rect()
-        self.rect.inflate_ip(self.rect.w * scale_factor, self.rect.h * scale_factor)
-        self.image = pygame.transform.scale(image, self.rect[-2:])
-        self.rect.x, self.rect.y = pos
-        self.alpha = 255
+        filename = './gfx/objects/crate.png'
+        super(Crate, self).__init__(filename, pos, scale_factor)
 
     def fade(self):
         self.alpha -= 10

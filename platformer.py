@@ -12,6 +12,7 @@
 - walking interferes with animations
 - left edge is constrained but right edge isn't
 - minimap
+- game over when player falls to bottomless pit
 - scrolling displaces player
 """
 
@@ -46,6 +47,7 @@ class Game(object):
         self.debug = False
         self.shift = False
         self.follow = False
+        self.minimap = False
         self.FPS = 60
         self.bg = Background(SIZE)
         self.camera = Camera(w=WIDTH, h=HEIGHT)
@@ -83,6 +85,8 @@ class Game(object):
 
 
     def toggle_paused(self):
+        if self.minimap: return
+
         self.paused = not self.paused
 
 
@@ -93,6 +97,11 @@ class Game(object):
     def toggle_slomo(self):
         # slow motion
         self.FPS = 30 if self.FPS == 60 else 60
+
+
+    def toggle_minimap(self):
+        self.minimap = not self.minimap
+        self.paused = self.minimap
 
 
     def ranged_attack(self):
@@ -161,6 +170,20 @@ class Game(object):
         for zombie in self.zombies.sprites() + self.fading_zombies:
             zombie.draw(self.screen, self.camera, self.debug)
 
+        if self.minimap:
+            mm = pg.Rect(100, 60, WIDTH-200, HEIGHT-120)
+            map_cam = Camera(*mm)
+            map_cam.move(-220, -200) # TODO: dynamic offset & scale factor to fit whole level
+            pg.draw.rect(self.screen, pg.Color('gray'), mm, 0)
+            for sprite in self.fixed_sprites:
+                self.screen.blit(sprite.map_image, map_cam.apply_rect(sprite.map_rect))
+            # draw current screen
+            cur_screen = self.camera.pos.copy()
+            cur_screen.w *= 0.5
+            cur_screen.h *= 0.5
+            cur_screen.x *= 0.5
+            cur_screen.y *= 0.5
+            pg.draw.rect(self.screen, pg.Color('red'), map_cam.apply_rect(cur_screen), 1)
 
 
     def run(self):
@@ -192,6 +215,7 @@ class Game(object):
                 pg.K_v: self.ranged_attack,
                 pg.K_r: self.reset,
                 pg.K_p: self.toggle_paused,
+                pg.K_m: self.toggle_minimap,
                 pg.K_b: lambda: [zombie.die() for zombie in self.zombies],
                 pg.K_a: lambda: [zombie.attack() for zombie in self.zombies],
             })

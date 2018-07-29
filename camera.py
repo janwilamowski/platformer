@@ -19,3 +19,6 @@ class Camera(object):
 
     def reset(self):
         self.pos.x = self.pos.y = 0
+
+    def __repr__(self):
+        return 'Camera {}'.format(self.pos)
