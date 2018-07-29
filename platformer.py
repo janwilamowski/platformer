@@ -11,7 +11,6 @@
 - have objects fall
 - walking interferes with animations
 - left edge is constrained but right edge isn't
-- minimap
 - game over when player falls to bottomless pit
 - scrolling displaces player
 """
@@ -70,14 +69,18 @@ class Game(object):
         for char in self.zombies.sprites() + [self.player]:
             char.reset()
             # TODO: readd zombies
-        level, deco, self.objects, level_rect = load_level()
+        level, deco, self.objects, level_rect, cam_origin = load_level()
         self.fixed_sprites = level + deco + self.objects
         del self.blocks[:]
         self.blocks.extend( [block.rect for block in level] )
-        self.camera.pos.center = level_rect.center
-        self.camera.pos.bottom = level_rect.bottom
+        if cam_origin:
+            self.camera.reset()
+            self.camera.move(*cam_origin)
+            self.camera.pos.bottom = min(self.camera.pos.bottom, level_rect.bottom)
+        else:
+            self.camera.pos.center = level_rect.center
+            self.camera.pos.bottom = level_rect.bottom
         self.level_rect = level_rect
-        # self.camera.reset()
 
 
     def toggle_debug(self):

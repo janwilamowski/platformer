@@ -4,6 +4,7 @@ import pygame
 # we use half steps in the level set up to fill the gaps
 
 LEVEL = """
+X
 
 
 
@@ -40,9 +41,13 @@ def hex2dec(hex_str):
 
 def load_level():
     images = []
+    cam_origin = None
     for y, line in enumerate(LEVEL.splitlines()):
         for x, block in enumerate(line):
             if not block.strip(): continue
+            if block == 'X':
+                cam_origin = (x*32, y*32)
+                continue
             img = LevelBlock(hex2dec(block), (x*32, y*32))
             images.append(img)
     level_size = (x+2)*32, (y+2)*32
@@ -61,7 +66,7 @@ def load_level():
     # second floor
     deco.append( Decoration('skeleton', (700, 144)))
 
-    return images, deco, objects, pygame.Rect((0, 0), level_size)
+    return images, deco, objects, pygame.Rect((0, 0), level_size), cam_origin
 
 
 class LevelSprite(pygame.sprite.Sprite):
